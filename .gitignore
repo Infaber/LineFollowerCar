@@ -1,1 +1,22 @@
-.pio
+# PlatformIO build output
+.pio/
+.pioenvs/
+libdeps/
+*.pio
+
+# PlatformIO cache
+.pio/.cache/
+
+# CLion IDE files
+.idea/
+*.iml
+cmake-build-*/
+
+# OS files (optional, but helpful)
+.DS_Store
+Thumbs.db
+
+# Backup / temporary files
+*.tmp
+*.bak
+*.swp
