@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <QTRSensors.h>
+#include "Drive.hpp"
 
 #define LED 2  // Built-in LED pin for most ESP32 boards
 
@@ -12,13 +13,6 @@ const uint8_t SensorCount = 15;
 uint16_t sensorValues[SensorCount];
 
 // Motor control pins
-const int AIN1 = 32;
-const int AIN2 = 35;
-const int PWMA = 34;
-
-const int BIN1 = 0;
-const int BIN2 = 2;
-const int PWMB = 4;
 
 
 
@@ -74,13 +68,7 @@ void setup()
  // digitalWrite(LED_BUILTIN, LOW);
 
   // Motor pins
-  pinMode(AIN1, OUTPUT);
-  pinMode(AIN2, OUTPUT);
-  pinMode(PWMA, OUTPUT);
 
-  pinMode(BIN1, OUTPUT);
-  pinMode(BIN2, OUTPUT);
-  pinMode(PWMB, OUTPUT);
 
   Serial.println("Calibration is done");
 }
@@ -106,8 +94,8 @@ positionLine=0;
   int motorSpeedA = baseSpeedValue + motorSpeed;
   int motorSpeedB = baseSpeedValue - motorSpeed;
 
-  rightMotor (constrain(motorSpeedA, -255, 255));
-  leftMotor (constrain(motorSpeedB, -255, 255));
+  rightMotor (constrain(motorSpeedA, 0, 255));
+  leftMotor (constrain(motorSpeedB, 0, 255));
 }
 
 void loop()
@@ -122,31 +110,4 @@ void loop()
     Serial.print("Position: ");
     Serial.println(positionLine);
     delay(100);
-}
-void rightMotor(int speed){
-  if (speed > 0) {
-    digitalWrite(AIN1, HIGH);
-    digitalWrite(AIN2, LOW);
-  } else if (speed < 0) {
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, HIGH);
-  } else {
-    digitalWrite(AIN1, LOW);
-    digitalWrite(AIN2, LOW);
-  }
-  analogWrite(PWMA, abs(speed));
-}
-
-void leftMotor(int speed){
-  if (speed > 0) {
-    digitalWrite(BIN1, HIGH);
-    digitalWrite(BIN2, LOW);
-  } else if (speed < 0) {
-    digitalWrite(BIN1, LOW);
-    digitalWrite(BIN2, HIGH);
-  } else {
-    digitalWrite(BIN1, LOW);
-    digitalWrite(BIN2, LOW);
-  }
-  analogWrite(PWMB, abs(speed));
 }
