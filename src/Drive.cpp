@@ -1,6 +1,6 @@
 #include "Drive.hpp"
 
-Motordriver(){
+Motordriver::Motordriver() {
     pinMode(AIN1_, OUTPUT);
     pinMode(AIN2_, OUTPUT);
     pinMode(PWMA_, OUTPUT);
@@ -9,30 +9,30 @@ Motordriver(){
     pinMode(PWMB_, OUTPUT);
 }
 
-void Motordriver::right_motor(int speed){
+void Motordriver::right_motor(int speed) {
     if (speed > 0) {
-        digitalWrite(AIN1, HIGH);
-        digitalWrite(AIN2, LOW);
+        digitalWrite(AIN1_, HIGH);
+        digitalWrite(AIN2_, LOW);
     } else if (speed < 0) {
-        digitalWrite(AIN1, LOW);
-        digitalWrite(AIN2, HIGH);
+        digitalWrite(AIN1_, LOW);
+        digitalWrite(AIN2_, HIGH);
     } else {
-        digitalWrite(AIN1, LOW);
-        digitalWrite(AIN2, LOW);
+        digitalWrite(AIN1_, LOW);
+        digitalWrite(AIN2_, LOW);
     }
-    analogWrite(PWMA, abs(speed));
+    analogWrite(PWMA_, abs(speed));
 }
 
-void Motordriver::left_motor(int speed){
+void Motordriver::left_motor(int speed) {
     if (speed > 0) {
-        digitalWrite(BIN1, HIGH);
-        digitalWrite(BIN2, LOW);
+        digitalWrite(BIN1_, HIGH);
+        digitalWrite(BIN2_, LOW);
     } else if (speed < 0) {
-        digitalWrite(BIN1, LOW);
-        digitalWrite(BIN2, HIGH);
+        digitalWrite(BIN1_, LOW);
+        digitalWrite(BIN2_, HIGH);
     } else {
-        digitalWrite(BIN1, LOW);
-        digitalWrite(BIN2, LOW);
+        digitalWrite(BIN1_, LOW);
+        digitalWrite(BIN2_, LOW);
     }
-    analogWrite(PWMB, abs(speed));
+    analogWrite(PWMB_, abs(speed));
 }

@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 class IRSensor {
-public:
+  public:
     IRSensor();
     ~IRSensor();
-}
+};

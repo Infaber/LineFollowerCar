@@ -1,11 +1,22 @@
 #include <Arduino.h>
 #include <QTRSensors.h>
-#include "Drive.hpp"
+#include "Wheels.h"
 
 #define LED 2  // Built-in LED pin for most ESP32 boards
 
 void rightMotor(int speed);
 void leftMotor(int speed);
+
+// Wheels wrapper instance (hardware-only; PID stays below).
+static Wheels wheels;
+
+void rightMotor(int speed) {
+    wheels.setRight(speed);
+}
+
+void leftMotor(int speed) {
+    wheels.setLeft(speed);
+}
 
 QTRSensors qtr;
 
@@ -49,6 +60,8 @@ void setup()
 {
   Serial.begin(115200);
   Serial.println("QTR calibration  (digital)");
+
+  wheels.begin();
 
   // Use analog mode
   qtr.setTypeRC();
