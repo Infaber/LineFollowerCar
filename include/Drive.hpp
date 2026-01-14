@@ -1,5 +1,4 @@
-#ifndef MOTORDRIVER_HPP
-#define MOTORDRIVER_HPP
+#pragma once
 
 #include <Arduino.h>
 
@@ -17,7 +16,4 @@ public:
     Motordriver();
     void right_motor(int speed);
     void left_motor(int speed);
-
 };
-
-#endif
