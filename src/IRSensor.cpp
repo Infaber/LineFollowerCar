@@ -43,7 +43,7 @@ uint16_t IRSensor::readPosition() {
         return CENTER_POSITION;
     }
 
-    // Read line position (average of 5 readings for stability)
+    //Read line position (average of 5 readings for stability)
     uint16_t position = 0;
     for (uint8_t i = 0; i < 5; i++) {
         position += qtr.readLineBlack(sensorValues);
@@ -84,7 +84,7 @@ bool IRSensor::isCalibrated() {
 }
 
 void IRSensor::updateFilter(uint16_t newValue) {
-    // Shift values in filter array
+    //Shift values in filter array
     for (uint8_t i = FILTER_SIZE - 1; i > 0; i--) {
         filteredPos[i] = filteredPos[i - 1];
     }

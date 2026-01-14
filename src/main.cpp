@@ -47,5 +47,5 @@ void loop() {
   Serial.print("\tCorrection: ");
   Serial.println(correction);
 
-  delay(100);
+  delay(1000);
 }
