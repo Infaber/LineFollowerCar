@@ -8,16 +8,16 @@
 //Objekt instanser
 IRSensor irSensor;
 Motordriver motors;
-PID pid(0.001, 0.00, 0.00, IRSensor::CENTER_POSITION);
+PID pid(0.065, 0.00, 0.22, IRSensor::CENTER_POSITION);
 
 //Kjøre parametere
-int baseSpeedValue = 50; // 255 på mange svinger bane, 200 på bane med 90 grader
+int baseSpeedValue = 100; // 255 på mange svinger bane, 200 på bane med 90 grader
 
 void setup() {
   Serial.begin(115200);
   Serial.println("Line follower robot starting...");
 
-  delay(500);
+ // delay(500);
 
   // Kalibrer IR sensoren (4 sekunder)
   irSensor.calibrate(2000);
@@ -37,8 +37,8 @@ void loop() {
   int motorSpeedB = baseSpeedValue - correction;
 
   // Sett motor hastigheter (begrens til 0-255)
-  motors.right_motor(constrain(motorSpeedA, 0, 75));
-  motors.left_motor(constrain(motorSpeedB, 0, 75));
+  motors.right_motor(constrain(motorSpeedA, 0, 125));
+  motors.left_motor(constrain(motorSpeedB, 0, 125));
 
   // Debug output
   irSensor.printSensorValues();
