@@ -11,7 +11,7 @@ Motordriver motors;
 PID pid(0.065, 0.00, 0.22, IRSensor::CENTER_POSITION);
 
 //Kjøre parametere
-int baseSpeedValue = 255; // 255 på mange svinger bane, 200 på bane med 90 grader
+int baseSpeedValue = 150; // 255 på mange svinger bane, 200 på bane med 90 grader
 
 void setup() {
   Serial.begin(115200);
@@ -26,19 +26,19 @@ void setup() {
 }
 
 void loop() {
-  // Les posisjon fra IR sensor
+  //Les posisjon fra IR sensor
   uint16_t position = irSensor.readPosition();
 
-  // Beregn PID korreksjon
+  //Beregn PID korreksjon
   int correction = pid.compute(position);
 
-  // Kalkuler motor hastigheter
+  //Kalkuler motor hastigheter
   int motorSpeedA = baseSpeedValue + correction;
   int motorSpeedB = baseSpeedValue - correction;
 
   // Sett motor hastigheter (begrens til 0-255)
-  motors.right_motor(constrain(motorSpeedA, 0, 255));
-  motors.left_motor(constrain(motorSpeedB, 0, 255));
+  motors.right_motor(constrain(motorSpeedA, 0, 150));
+  motors.left_motor(constrain(motorSpeedB, 0, 150));
 
   // Debug output
   irSensor.printSensorValues();
@@ -47,5 +47,5 @@ void loop() {
   Serial.print("\tCorrection: ");
   Serial.println(correction);
 
-  delay(1000);
+  delay(500);
 }

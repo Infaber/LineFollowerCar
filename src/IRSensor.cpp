@@ -10,7 +10,7 @@ IRSensor::IRSensor() {
         sensorValues[i] = 0;
     }
 
-    // Initialize filter array with center position
+    //Initialize filter array with center position
     for (uint8_t i = 0; i < FILTER_SIZE; i++) {
         filteredPos[i] = CENTER_POSITION;
     }
@@ -20,7 +20,7 @@ IRSensor::IRSensor() {
 }
 
 IRSensor::~IRSensor() {
-    // Destructor - cleanup if needed
+    //Destructor - cleanup if needed
 }
 
 void IRSensor::calibrate(uint16_t duration_ms) {

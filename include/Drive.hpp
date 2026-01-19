@@ -4,13 +4,13 @@
 
 class Motordriver {
 private:
-    int AIN1_ = 32;
-    int AIN2_ = 35;
-    int PWMA_ = 34;
+    int AIN1_ = 27;
+    int AIN2_ = 26;
+    int PWMA_ = 25;
 
-    int BIN1_ = 0;
-    int BIN2_ = 2;
-    int PWMB_ = 4;
+    int BIN1_ = 18;
+    int BIN2_ = 5;
+    int PWMB_ = 13;
 
 public:
     Motordriver();
