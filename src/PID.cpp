@@ -1,6 +1,6 @@
 #include "PID.hpp"
 
-PID::PID(float p, float i, float d, int target) {
+PID::PID(float p, float i, float d, float target) {
     kp = p;
     ki = i;
     kd = d;
@@ -9,23 +9,23 @@ PID::PID(float p, float i, float d, int target) {
     integral = 0;
 }
 
-int PID::compute(int current_value) {
+float PID::compute(float current_value) {
     //Beregn error
-    int error = setpoint - current_value;
+    float error = setpoint - current_value;
 
     //P term
-    int P = error;
+    float P = error;
 
     //I term (med anti-windup)
     integral = constrain(integral + error, -100000, 100000);
-    int I = integral;
+    float I = integral;
 
     //D term
-    int D = error - previous_error;
+    float D = error - previous_error;
     previous_error = error;
 
     //Beregn korreksjon
-    int correction = P * kp + I * ki + D * kd;
+    float correction = P * kp + I * ki + D * kd;
 
     return correction;
 }

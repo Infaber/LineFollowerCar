@@ -45,9 +45,13 @@ void loop() {
   int motorSpeedA = baseSpeedValue - correction;
   int motorSpeedB = baseSpeedValue + correction;
 
-  // Sett motor hastigheter (begrens til 0-255)
-  motors.right_motor((motorSpeedA, 0, 125));
-  motors.left_motor((motorSpeedB, 0, 125));
+  // Begrens til 0-255
+  motorSpeedA = constrain(motorSpeedA, 0, 255);
+  motorSpeedB = constrain(motorSpeedB, 0, 255);
+
+  // Sett motor hastigheter
+  motors.right_motor(motorSpeedA);
+  motors.left_motor(motorSpeedB);
 
 
 

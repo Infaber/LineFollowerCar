@@ -11,11 +11,11 @@ Motordriver::Motordriver() {
 
 void Motordriver::right_motor(int speed){
     if (speed > 0) {
-        digitalWrite(AIN1_, HIGH);
-        digitalWrite(AIN2_, LOW);
-    } else if (speed < 0) {
         digitalWrite(AIN1_, LOW);
         digitalWrite(AIN2_, HIGH);
+    } else if (speed < 0) {
+        digitalWrite(AIN1_, HIGH);
+        digitalWrite(AIN2_, LOW);
     } else {
         digitalWrite(AIN1_, LOW);
         digitalWrite(AIN2_, LOW);
@@ -36,4 +36,6 @@ void Motordriver::left_motor(int speed){
     }
     analogWrite(PWMB_, abs(speed));
 }
+
+
 
