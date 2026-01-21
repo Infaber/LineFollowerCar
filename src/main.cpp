@@ -14,15 +14,24 @@ PID pid(0.065, 0.00, 0.22, IRSensor::CENTER_POSITION);
 int baseSpeedValue = 100; // 255 på mange svinger bane, 200 på bane med 90 grader
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println("Line follower robot starting...");
+    Serial.begin(115200);
+    Serial.println("Line follower robot starting...");
 
- // delay(500);
+    // TEST HØYRE MOTOR DIREKTE
+    Serial.println("Testing RIGHT motor at 150 speed...");
+    motors.right_motor(150);
+    delay(3000);
+    motors.right_motor(0);
 
-  // Kalibrer IR sensoren (4 sekunder)
-  irSensor.calibrate(2000);
+    Serial.println("Testing LEFT motor at 150 speed...");
+    motors.left_motor(150);
+    delay(3000);
+    motors.left_motor(0);
 
-  Serial.println("Setup complete! Starting line following...");
+    // Kalibrer IR sensoren (4 sekunder)
+    irSensor.calibrate(2000);
+
+    Serial.println("Setup complete! Starting line following...");
 }
 
 void loop() {
@@ -33,19 +42,22 @@ void loop() {
   int correction = pid.compute(position);
 
   //Kalkuler motor hastigheter
-  int motorSpeedA = baseSpeedValue + correction;
-  int motorSpeedB = baseSpeedValue - correction;
+  int motorSpeedA = baseSpeedValue - correction;
+  int motorSpeedB = baseSpeedValue + correction;
 
   // Sett motor hastigheter (begrens til 0-255)
-  motors.right_motor(constrain(motorSpeedA, 0, 125));
-  motors.left_motor(constrain(motorSpeedB, 0, 125));
+  motors.right_motor((motorSpeedA, 0, 125));
+  motors.left_motor((motorSpeedB, 0, 125));
+
+
 
   // Debug output
-  irSensor.printSensorValues();
-  Serial.print("Position: ");
-  Serial.print(position);
-  Serial.print("\tCorrection: ");
-  Serial.println(correction);
-
-  delay(500);
+    static unsigned long lastDebug = 0;
+    if (millis() - lastDebug > 1000) {
+        Serial.print("Pos: "); Serial.print(position);
+        Serial.print(" | Corr: "); Serial.print(correction);
+        Serial.print(" | L: "); Serial.print(motorSpeedB);
+        Serial.print(" | R: "); Serial.println(motorSpeedA);
+        lastDebug = millis();
+    }
 }
