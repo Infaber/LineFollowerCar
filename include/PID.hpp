@@ -9,11 +9,11 @@ private:
     float kd;
     float previous_error;
     float integral;
-    int setpoint;
+    float setpoint;
 
 public:
-    PID(float p, float i, float d, int target);
-    int compute(int current_value);
+    PID(float p, float i, float d, float target);
+    float compute(float current_value);
     void reset();
     void setTunings(float p, float i, float d);
 };

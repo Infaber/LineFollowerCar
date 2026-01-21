@@ -8,7 +8,7 @@
 //Objekt instanser
 IRSensor irSensor;
 Motordriver motors;
-PID pid(0.065, 0.00, 0.22, IRSensor::CENTER_POSITION);
+PID pid(0.03, 0.00, 0.10, IRSensor::CENTER_POSITION);
 
 //Kjøre parametere
 int baseSpeedValue = 100; // 255 på mange svinger bane, 200 på bane med 90 grader
@@ -46,12 +46,12 @@ void loop() {
   int motorSpeedB = baseSpeedValue + correction;
 
   // Begrens til 0-255
-  motorSpeedA = constrain(motorSpeedA, 0, 255);
-  motorSpeedB = constrain(motorSpeedB, 0, 255);
+  motorSpeedA = constrain(motorSpeedA, 0, 150);
+  motorSpeedB = constrain(motorSpeedB, 0, 150);
 
-  // Sett motor hastigheter
-  motors.right_motor(motorSpeedA);
-  motors.left_motor(motorSpeedB);
+  // Sett motor hastigheter (swapped because wiring is reversed)
+  motors.left_motor(motorSpeedA);
+  motors.right_motor(motorSpeedB);
 
 
 
