@@ -2,66 +2,56 @@
 #include "IRSensor.hpp"
 #include "Drive.hpp"
 #include "PID.hpp"
+#include "WifiPid.hpp"
 
-#define LED 2  // Built-in LED pin for most ESP32 boards
+#define LED 2
 
-//Objekt instanser
 IRSensor irSensor;
 Motordriver motors;
 PID pid(0.03, 0.00, 0.10, IRSensor::CENTER_POSITION);
+WifiPid wifi(pid);
 
-//Kjøre parametere
-int baseSpeedValue = 100; // 255 på mange svinger bane, 200 på bane med 90 grader
+// Kjøre parametere
+int baseSpeedValue = 100;  // 255 på mange svinger bane, 200 på bane med 90 grader
 
 void setup() {
     Serial.begin(115200);
-    Serial.println("Line follower robot starting...");
+    delay(200);
 
-    // TEST HØYRE MOTOR DIREKTE
-    Serial.println("Testing RIGHT motor at 150 speed...");
-    motors.right_motor(150);
-    delay(3000);
-    motors.right_motor(0);
-
-    Serial.println("Testing LEFT motor at 150 speed...");
-    motors.left_motor(150);
-    delay(3000);
-    motors.left_motor(0);
-
-    // Kalibrer IR sensoren (4 sekunder)
-    irSensor.calibrate(2000);
-
-    Serial.println("Setup complete! Starting line following...");
+    wifi.begin();              // Start WiFi AP + webserver
+    irSensor.calibrate(2000);  // Kalibrer sensorer
 }
 
 void loop() {
-  //Les posisjon fra IR sensor
-  uint16_t position = irSensor.readPosition();
+    wifi.handle(); // IMPORTANT: keeps the webserver alive!
 
-  //Beregn PID korreksjon
-  int correction = pid.compute(position);
+    //Les posisjon fra IR sensor
+    uint16_t position = irSensor.readPosition();
 
-  //Kalkuler motor hastigheter
-  int motorSpeedA = baseSpeedValue - correction;
-  int motorSpeedB = baseSpeedValue + correction;
+    //Beregn PID korreksjon
+    int correction = (int)pid.compute(position);
 
-  // Begrens til 0-255
-  motorSpeedA = constrain(motorSpeedA, 0, 150);
-  motorSpeedB = constrain(motorSpeedB, 0, 150);
+    //(Valgfritt men anbefalt) begrens korreksjonen så den ikke klipper altfor hardt
+    correction = constrain(correction, -80, 80);
 
-  // Sett motor hastigheter (swapped because wiring is reversed)
-  motors.left_motor(motorSpeedA);
-  motors.right_motor(motorSpeedB);
+    // Kalkuler motor hastigheter
+    int left  = baseSpeedValue - correction;
+    int right = baseSpeedValue + correction;
 
+    // Begrens og sett motorer
+    left  = constrain(left, 0, 150);
+    right = constrain(right, 0, 150);
 
+    motors.left_motor(left);
+    motors.right_motor(right);
 
-  // Debug output
+    // Debug output
     static unsigned long lastDebug = 0;
     if (millis() - lastDebug > 1000) {
         Serial.print("Pos: "); Serial.print(position);
         Serial.print(" | Corr: "); Serial.print(correction);
-        Serial.print(" | L: "); Serial.print(motorSpeedB);
-        Serial.print(" | R: "); Serial.println(motorSpeedA);
+        Serial.print(" | L: "); Serial.print(left);
+        Serial.print(" | R: "); Serial.println(right);
         lastDebug = millis();
     }
 }
