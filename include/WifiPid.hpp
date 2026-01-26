@@ -15,7 +15,7 @@ public:
     void handle();
 
     void start();
-    void stop();
+    void stopp();
     bool isRunning() const;
 
     float getKp() const;
