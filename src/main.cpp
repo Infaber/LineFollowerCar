@@ -6,35 +6,31 @@
 
 #define LED 2
 
-// Debug switches (runtime)
-const bool DEBUG_SERIAL  = true;
-const bool DEBUG_PID     = true;
-const bool DEBUG_LOOP_HZ = false;  // set true if you want loop Hz printed
+// Debug
+const bool DEBUG_SERIAL = true;
+const bool DEBUG_PID    = true;
 
+// Sensor + motor
 IRSensor irSensor;
 Motordriver motors;
 
-// PID defaults
-PID pid(0.03, 0.00, 0.10, IRSensor::CENTER_POSITION);
+// Svingefølsomhet via WiFi
+float turnGain = 1.00f;
 
-// Speed limits
-int baseSpeedValue = 100;
-const int MAX_MOTOR_SPEED = 150;
+// PID startverdier (tunes via WiFi)
+PID pid(0.065, 0.00, 0.22, IRSensor::CENTER_POSITION);
 
-// WiFi PID tuner (initial values)
-WifiPid wifi(pid, irSensor, baseSpeedValue, 0.03, 0.00, 0.10);
+// Fart
+int baseSpeedValue = 150;
+const int MAX_PWM = 255;
 
-static void printLoopHz() {
-    static unsigned long lastHzTime = 0;
-    static uint32_t loopCounter = 0;
-    loopCounter++;
-    if (millis() - lastHzTime >= 1000) {
-        Serial.print("Loop Hz: ");
-        Serial.println(loopCounter);
-        loopCounter = 0;
-        lastHzTime = millis();
-    }
-}
+// NYTT: hindrer at den snapper hardt til siden
+const int MAX_TURN = 225;     // juster 50–120
+
+// NYTT: hindrer at den jager rundt midten pga støy
+const int DEADBAND = 15;     // juster 15–60
+
+WifiPid wifi(pid, irSensor, baseSpeedValue, turnGain, 0.065, 0.00, 0.22);
 
 void setup() {
     pinMode(LED, OUTPUT);
@@ -45,65 +41,20 @@ void setup() {
 
     if (DEBUG_SERIAL) Serial.println("Booting...");
 
-    // If IRSensor has a begin(), call it (uncomment if your class provides it)
-    // irSensor.begin();
-
     wifi.begin();
     if (DEBUG_SERIAL) Serial.println("WiFi started");
 
-    // Optional: calibrate on boot (you can remove this and use the web button instead)
-    if (DEBUG_SERIAL) Serial.println("Starting IR sensor calibration...");
+    if (DEBUG_SERIAL) Serial.println("Starting calibration...");
     irSensor.calibrate(2000);
     if (DEBUG_SERIAL) Serial.println("Calibration done");
 
-    // IMPORTANT: ensure the robot starts immediately (so you get prints + motion without pressing START)
-    // Comment this out if you only want to start from the webpage.
-    wifi.start();
+    // wifi.start();  // valgfritt auto-start
 }
 
 void loop() {
-    wifi.handle();  // keep webserver responsive
+    wifi.handle();
 
-    if (DEBUG_LOOP_HZ) {
-        printLoopHz();
-    }
-
-    // Always print debug values periodically (even when stopped)
-    if (DEBUG_PID) {
-        static unsigned long lastDebug = 0;
-        if (millis() - lastDebug >= 200) {  // faster updates; change to 500 if you want less spam
-            Serial.print("RUN: "); Serial.print(wifi.isRunning() ? "1" : "0");
-            Serial.print(" | Base: "); Serial.print(baseSpeedValue);
-
-            if (wifi.isRunning()) {
-                uint16_t pos = irSensor.readPosition();
-                Serial.print(" | Pos: "); Serial.print(pos);
-
-                float corrF = pid.compute(pos);
-                int correction = (int)roundf(corrF);
-
-                int maxCorr = baseSpeedValue + 20;
-                correction = constrain(correction, -maxCorr, maxCorr);
-
-                int left  = baseSpeedValue - correction;
-                int right = baseSpeedValue + correction;
-
-                left  = constrain(left, 0, MAX_MOTOR_SPEED);
-                right = constrain(right, 0, MAX_MOTOR_SPEED);
-
-                Serial.print(" | Corr: "); Serial.print(correction);
-                Serial.print(" | L: "); Serial.print(left);
-                Serial.print(" | R: "); Serial.print(right);
-            } else {
-                Serial.print(" | Pos: --- | Corr: --- | L: 0 | R: 0");
-            }
-
-            Serial.println();
-            lastDebug = millis();
-        }
-    }
-
-    // If not running, keep motors stopped and exit early
+    // STOPP hvis ikke RUN
     if (!wifi.isRunning()) {
         motors.left_motor(0);
         motors.right_motor(0);
@@ -113,21 +64,50 @@ void loop() {
 
     digitalWrite(LED, HIGH);
 
-    // Normal line following (run every loop)
+    // 1) Les posisjon
     uint16_t position = irSensor.readPosition();
 
-    float corrF = pid.compute(position);
-    int correction = (int)roundf(corrF);
+    // 2) PID -> motorSpeed (skaleres med turnGain)
+    float raw = pid.compute(position);
+    int motorSpeed = (int)lroundf(raw * turnGain);
 
-    int maxCorr = baseSpeedValue + 20;
-    correction = constrain(correction, -maxCorr, maxCorr);
+    // ===== NYTT: Deadband rundt midten =====
+    // Hvis du er "nærme nok" midten, ikke korriger i det hele tatt.
+    int error = (int)position - (int)IRSensor::CENTER_POSITION;
+    if (abs(error) < DEADBAND) {
+        motorSpeed = 0;
+    }
 
-    int left  = baseSpeedValue - correction;
-    int right = baseSpeedValue + correction;
+    // ===== NYTT: Maks sving =====
+    // Hindrer at den svinger alt for hardt og begynner å oscillere.
+    motorSpeed = constrain(motorSpeed, -MAX_TURN, MAX_TURN);
 
-    left  = constrain(left, 0, MAX_MOTOR_SPEED);
-    right = constrain(right, 0, MAX_MOTOR_SPEED);
+    // 3) Motor-miks (denne retningen var riktig for deg)
+    int right = baseSpeedValue - motorSpeed;
+    int left  = baseSpeedValue + motorSpeed;
 
-    motors.left_motor(left);
+    // 4) Full range + revers
+    right = constrain(right, -MAX_PWM, MAX_PWM);
+    left  = constrain(left,  -MAX_PWM, MAX_PWM);
+
+    // 5) Kjør motorer
     motors.right_motor(right);
+    motors.left_motor(left);
+
+    // Debug
+    if (DEBUG_PID) {
+        static unsigned long lastDebug = 0;
+        if (millis() - lastDebug > 300) {
+            Serial.print("Pos: "); Serial.print(position);
+            Serial.print(" | Err: "); Serial.print(error);
+            Serial.print(" | PID: "); Serial.print(raw, 3);
+            Serial.print(" | Gain: "); Serial.print(turnGain, 2);
+            Serial.print(" | MS: "); Serial.print(motorSpeed);
+            Serial.print(" | L: "); Serial.print(left);
+            Serial.print(" | R: "); Serial.print(right);
+            Serial.print(" | Base: "); Serial.print(baseSpeedValue);
+            Serial.println();
+            lastDebug = millis();
+        }
+    }
 }

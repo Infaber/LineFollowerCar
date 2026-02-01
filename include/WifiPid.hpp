@@ -8,7 +8,7 @@ class IRSensor;
 
 class WifiPid {
 public:
-    WifiPid(PID& pidRef, IRSensor& irRef, int& baseSpeedRef,
+    WifiPid(PID& pidRef, IRSensor& irRef, int& baseSpeedRef, float& turnGainRef,
             float startKp, float startKi, float startKd);
 
     void begin();
@@ -21,12 +21,15 @@ public:
     float getKp() const;
     float getKi() const;
     float getKd() const;
+
     int   getBaseSpeed() const;
+    float getTurnGain() const;
 
 private:
     PID& pid;
     IRSensor& ir;
     int& baseSpeed;
+    float& turnGain;
 
     float kp;
     float ki;
@@ -34,11 +37,7 @@ private:
 
     bool running;
 
-    String calibrationStatus = "NOT DONE";
-    bool calibrating = false;                 // CHANGE: non-blocking calibration state
-    unsigned long calibStartMs = 0;           // CHANGE: when calibration started
-    unsigned long calibDurationMs = 2000;     // CHANGE: total calibration time
-
+    String calibrationStatus = "IKKE KALIBRERT";
 
     void setupServer();
 };
