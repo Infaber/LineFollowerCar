@@ -18,19 +18,16 @@ Motordriver motors;
 float turnGain = 1.00f;
 
 // PID startverdier (tunes via WiFi)
-PID pid(0.065, 0.00, 0.22, IRSensor::CENTER_POSITION);
+PID pid(0.0280, 0.0001, 0.1198, IRSensor::CENTER_POSITION);
 
 // Fart
-int baseSpeedValue = 150;
+int baseSpeedValue = 130;
 const int MAX_PWM = 255;
 
 // NYTT: hindrer at den snapper hardt til siden
 const int MAX_TURN = 225;     // juster 50–120
 
-// NYTT: hindrer at den jager rundt midten pga støy
-const int DEADBAND = 15;     // juster 15–60
-
-WifiPid wifi(pid, irSensor, baseSpeedValue, turnGain, 0.065, 0.00, 0.22);
+WifiPid wifi(pid, irSensor, baseSpeedValue, turnGain, 0.0280, 0.0001, 0.1198);
 
 void setup() {
     pinMode(LED, OUTPUT);
@@ -71,12 +68,8 @@ void loop() {
     float raw = pid.compute(position);
     int motorSpeed = (int)lroundf(raw * turnGain);
 
-    // ===== NYTT: Deadband rundt midten =====
-    // Hvis du er "nærme nok" midten, ikke korriger i det hele tatt.
+    //Error for debug
     int error = (int)position - (int)IRSensor::CENTER_POSITION;
-    if (abs(error) < DEADBAND) {
-        motorSpeed = 0;
-    }
 
     // ===== NYTT: Maks sving =====
     // Hindrer at den svinger alt for hardt og begynner å oscillere.
