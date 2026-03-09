@@ -1,37 +1,44 @@
 #include <Arduino.h>
 #include "IRSensor.hpp"
 #include "Drive.hpp"
+#include "MotorController.hpp"
 #include "PID.hpp"
 #include "WifiPid.hpp"
 
-#define LED 2
+// ============ Configuration ============
+constexpr uint8_t LED_PIN = 2;
 
-// Debug
-const bool DEBUG_SERIAL = true;
-const bool DEBUG_PID    = true;
+// Debug flags
+constexpr bool DEBUG_SERIAL = true;
+constexpr bool DEBUG_PID    = true;
 
-// Sensor + motor
+// PID default values
+constexpr float DEFAULT_KP = 0.0280f;
+constexpr float DEFAULT_KI = 0.0001f;
+constexpr float DEFAULT_KD = 0.1198f;
+
+// Motor settings
+constexpr int DEFAULT_BASE_SPEED = 130;
+constexpr int MAX_TURN = 225;
+constexpr int MAX_PWM  = 255;
+
+// ============ Global Objects ============
 IRSensor irSensor;
 Motordriver motors;
+MotorController motorController(motors, DEFAULT_BASE_SPEED, MAX_TURN, MAX_PWM);
 
-// Svingefølsomhet via WiFi
-float turnGain = 1.00f;
+PID pid(DEFAULT_KP, DEFAULT_KI, DEFAULT_KD, IRSensor::CENTER_POSITION);
 
-// PID startverdier (tunes via WiFi)
-PID pid(0.0280, 0.0001, 0.1198, IRSensor::CENTER_POSITION);
+// WiFi-tunable parameters (passed by reference)
+int   baseSpeedValue = DEFAULT_BASE_SPEED;
+float turnGain       = 1.0f;
 
-// Fart
-int baseSpeedValue = 130;
-const int MAX_PWM = 255;
+WifiPid wifi(pid, irSensor, baseSpeedValue, turnGain, DEFAULT_KP, DEFAULT_KI, DEFAULT_KD);
 
-// NYTT: hindrer at den snapper hardt til siden
-const int MAX_TURN = 225;     // juster 50–120
-
-WifiPid wifi(pid, irSensor, baseSpeedValue, turnGain, 0.0280, 0.0001, 0.1198);
-
+// ============ Setup ============
 void setup() {
-    pinMode(LED, OUTPUT);
-    digitalWrite(LED, LOW);
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, LOW);
 
     Serial.begin(115200);
     delay(200);
@@ -44,63 +51,53 @@ void setup() {
     if (DEBUG_SERIAL) Serial.println("Starting calibration...");
     irSensor.calibrate(2000);
     if (DEBUG_SERIAL) Serial.println("Calibration done");
-
-    // wifi.start();  // valgfritt auto-start
 }
 
+// ============ Debug Output ============
+void printDebugInfo(uint16_t position, int error, float pidOutput, int motorSpeed) {
+    static unsigned long lastDebug = 0;
+    if (millis() - lastDebug < 300) return;
+
+    Serial.print("Pos: ");   Serial.print(position);
+    Serial.print(" | Err: "); Serial.print(error);
+    Serial.print(" | PID: "); Serial.print(pidOutput, 3);
+    Serial.print(" | Gain: "); Serial.print(turnGain, 2);
+    Serial.print(" | MS: ");  Serial.print(motorSpeed);
+    Serial.print(" | Base: "); Serial.print(baseSpeedValue);
+    Serial.println();
+
+    lastDebug = millis();
+}
+
+// ============ Main Loop ============
 void loop() {
     wifi.handle();
 
-    // STOPP hvis ikke RUN
+    // Stop if not running
     if (!wifi.isRunning()) {
-        motors.left_motor(0);
-        motors.right_motor(0);
-        digitalWrite(LED, LOW);
+        motorController.stop();
+        digitalWrite(LED_PIN, LOW);
         return;
     }
 
-    digitalWrite(LED, HIGH);
+    digitalWrite(LED_PIN, HIGH);
 
-    // 1) Les posisjon
+    // Update motor controller base speed from WiFi
+    motorController.setBaseSpeed(baseSpeedValue);
+
+    // Read sensor position
     uint16_t position = irSensor.readPosition();
 
-    // 2) PID -> motorSpeed (skaleres med turnGain)
-    float raw = pid.compute(position);
-    int motorSpeed = (int)lroundf(raw * turnGain);
+    // Compute PID output and apply turn gain
+    float pidOutput = pid.compute(position);
+    int motorSpeed = static_cast<int>(lroundf(pidOutput * turnGain));
 
-    //Error for debug
-    int error = (int)position - (int)IRSensor::CENTER_POSITION;
+    // Drive motors
+    motorController.drive(motorSpeed);
 
-    // ===== NYTT: Maks sving =====
-    // Hindrer at den svinger alt for hardt og begynner å oscillere.
-    motorSpeed = constrain(motorSpeed, -MAX_TURN, MAX_TURN);
-
-    // 3) Motor-miks (denne retningen var riktig for deg)
-    int right = baseSpeedValue - motorSpeed;
-    int left  = baseSpeedValue + motorSpeed;
-
-    // 4) Full range + revers
-    right = constrain(right, -MAX_PWM, MAX_PWM);
-    left  = constrain(left,  -MAX_PWM, MAX_PWM);
-
-    // 5) Kjør motorer
-    motors.right_motor(right);
-    motors.left_motor(left);
-
-    // Debug
+    // Debug output
     if (DEBUG_PID) {
-        static unsigned long lastDebug = 0;
-        if (millis() - lastDebug > 300) {
-            Serial.print("Pos: "); Serial.print(position);
-            Serial.print(" | Err: "); Serial.print(error);
-            Serial.print(" | PID: "); Serial.print(raw, 3);
-            Serial.print(" | Gain: "); Serial.print(turnGain, 2);
-            Serial.print(" | MS: "); Serial.print(motorSpeed);
-            Serial.print(" | L: "); Serial.print(left);
-            Serial.print(" | R: "); Serial.print(right);
-            Serial.print(" | Base: "); Serial.print(baseSpeedValue);
-            Serial.println();
-            lastDebug = millis();
-        }
+        int error = static_cast<int>(position) - static_cast<int>(IRSensor::CENTER_POSITION);
+        printDebugInfo(position, error, pidOutput, motorSpeed);
     }
 }
