@@ -11,9 +11,9 @@ IRSensor::IRSensor() {
     }
 
     //Initialize filter array with center position
-    for (uint8_t i = 0; i < FILTER_SIZE; i++) {
-        filteredPos[i] = CENTER_POSITION;
-    }
+    // for (uint8_t i = 0; i < FILTER_SIZE; i++) {
+    //     filteredPos[i] = CENTER_POSITION;
+    // }
 
     currentPosition = CENTER_POSITION;
     calibrated = false;
@@ -53,7 +53,7 @@ uint16_t IRSensor::readPosition() {
     currentPosition = position;
 
     // Update filter
-    updateFilter(position);
+    // updateFilter(position);
 
     return position;
 }
@@ -63,7 +63,8 @@ uint16_t IRSensor::getRawPosition() {
 }
 
 uint16_t IRSensor::getFilteredPosition() {
-    return getFilterAverage();
+    // return getFilterAverage();
+    return currentPosition;
 }
 
 void IRSensor::getSensorValues(uint16_t* values) {
@@ -83,18 +84,18 @@ bool IRSensor::isCalibrated() {
     return calibrated;
 }
 
-void IRSensor::updateFilter(uint16_t newValue) {
-    //Shift values in filter array
-    for (uint8_t i = FILTER_SIZE - 1; i > 0; i--) {
-        filteredPos[i] = filteredPos[i - 1];
-    }
-    filteredPos[0] = newValue;
-}
+// void IRSensor::updateFilter(uint16_t newValue) {
+//     //Shift values in filter array
+//     for (uint8_t i = FILTER_SIZE - 1; i > 0; i--) {
+//         filteredPos[i] = filteredPos[i - 1];
+//     }
+//     filteredPos[0] = newValue;
+// }
 
-uint16_t IRSensor::getFilterAverage() {
-    uint32_t sum = 0;
-    for (uint8_t i = 0; i < FILTER_SIZE; i++) {
-        sum += filteredPos[i];
-    }
-    return sum / FILTER_SIZE;
-}
+// uint16_t IRSensor::getFilterAverage() {
+//     uint32_t sum = 0;
+//     for (uint8_t i = 0; i < FILTER_SIZE; i++) {
+//         sum += filteredPos[i];
+//     }
+//     return sum / FILTER_SIZE;
+// }

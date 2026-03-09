@@ -5,7 +5,7 @@
 class IRSensor {
 public:
     static const uint8_t SENSOR_COUNT = 9;
-    static const uint8_t FILTER_SIZE = 5;
+    // static const uint8_t FILTER_SIZE = 5;
     static const uint16_t CENTER_POSITION = 4000;  //For 9 sensorer (0-14000 skala)
 
     IRSensor();
@@ -27,11 +27,11 @@ public:
 private:
     QTRSensors qtr;
     uint16_t sensorValues[SENSOR_COUNT];
-    uint16_t filteredPos[FILTER_SIZE];
+    // uint16_t filteredPos[FILTER_SIZE];
     bool calibrated;
     uint16_t currentPosition;
 
     // Private hjelpefunksjoner
-    void updateFilter(uint16_t newValue);
-    uint16_t getFilterAverage();
+    // void updateFilter(uint16_t newValue);
+    // uint16_t getFilterAverage();
 };
