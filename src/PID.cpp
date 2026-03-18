@@ -34,6 +34,13 @@ float PID::compute(float current_value) {
     // Protect against divide-by-zero / very small dt
     if (dt <= 0.0f) dt = 0.001f;
 
+    return compute(current_value, dt);
+}
+
+float PID::compute(float current_value, float dt) {
+    // Protect against divide-by-zero / very small dt
+    if (dt <= 0.0f) dt = 0.001f;
+
     // Error
     float error = setpoint - current_value;
 

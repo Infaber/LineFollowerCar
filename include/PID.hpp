@@ -22,6 +22,9 @@ public:
 
     float compute(float current_value);
 
+    // Overload with explicit dt (seconds) – useful for unit testing
+    float compute(float current_value, float dt);
+
     void reset();
 
     void setTunings(float p, float i, float d);
