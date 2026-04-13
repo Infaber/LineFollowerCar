@@ -13,7 +13,7 @@ constexpr bool DEBUG_SERIAL = true;
 constexpr bool DEBUG_PID    = true;
 
 // PID default values
-constexpr float DEFAULT_KP = 0.0280f;
+constexpr float DEFAULT_KP = 0.0281f;
 constexpr float DEFAULT_KI = 0.0001f;
 constexpr float DEFAULT_KD = 0.1198f;
 
