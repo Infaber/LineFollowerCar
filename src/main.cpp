@@ -50,7 +50,7 @@ void setup() {
     if (DEBUG_SERIAL) Serial.println("WiFi started");
 
     if (DEBUG_SERIAL) Serial.println("Starting calibration...");
-    irSensor.calibrate(2000);
+    irSensor.calibrate(500);
     if (DEBUG_SERIAL) Serial.println("Calibration done");
 }
 
@@ -59,7 +59,9 @@ void printDebugInfo(uint16_t position, int error, float pidOutput, int motorSpee
     static unsigned long lastDebug = 0;
     if (millis() - lastDebug < 300) return;
 
-    Serial.print("Pos: ");   Serial.print(position);
+    Serial.print("Sensors: ");
+    irSensor.printSensorValues();
+    Serial.print(" | Pos: ");   Serial.print(position);
     Serial.print(" | Err: "); Serial.print(error);
     Serial.print(" | PID: "); Serial.print(pidOutput, 3);
     Serial.print(" | Gain: "); Serial.print(turnGain, 2);
@@ -73,6 +75,21 @@ void printDebugInfo(uint16_t position, int error, float pidOutput, int motorSpee
 // ============ Main Loop ============
 void loop() {
     wifi.handle();
+
+    // Always print sensor values for debugging
+    if (DEBUG_PID) {
+        static unsigned long lastDebug = 0;
+        if (millis() - lastDebug >= 300) {
+            uint16_t position = irSensor.readPosition();
+            Serial.print("Sensors: ");
+            irSensor.printSensorValues();
+            Serial.print(" | Pos: ");
+            Serial.print(position);
+            Serial.print(" | Running: ");
+            Serial.println(wifi.isRunning() ? "YES" : "NO");
+            lastDebug = millis();
+        }
+    }
 
     // Stop if not running
     if (!wifi.isRunning()) {

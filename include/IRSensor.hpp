@@ -4,9 +4,9 @@
 
 class IRSensor {
 public:
-    static const uint8_t SENSOR_COUNT = 9;
+    static const uint8_t SENSOR_COUNT = 8;
     // tatic const uint8_t FILTER_SIZE = 5;
-    static const uint16_t CENTER_POSITION = 4000;  //For 9 sensorer (0-14000 skala)
+    static const uint16_t CENTER_POSITION = 3500;  // For 8 sensorer: (8-1)*1000/2 = 3500
 
     IRSensor();
     ~IRSensor();

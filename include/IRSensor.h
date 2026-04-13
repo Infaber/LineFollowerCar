@@ -5,4 +5,4 @@ class IRSensor {
 public:
     IRSensor();
     ~IRSensor();
-}
+};

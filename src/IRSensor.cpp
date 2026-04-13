@@ -1,9 +1,11 @@
 #include "IRSensor.hpp"
+#include "esp_task_wdt.h"
+#include "soc/rtc_wdt.h"
 
 IRSensor::IRSensor() {
     // Initialize QTR sensor
     qtr.setTypeRC();
-    qtr.setSensorPins((const uint8_t[]){33, 32, 23, 22, 21, 19, 17, 16, 4}, SENSOR_COUNT);
+    qtr.setSensorPins((const uint8_t[]){7, 37, 36, 33, 31, 27, 28, 26}, SENSOR_COUNT);
 
     // Initialize sensor values array
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {
@@ -26,10 +28,27 @@ IRSensor::~IRSensor() {
 void IRSensor::calibrate(uint16_t duration_ms) {
     Serial.println("Starting IR sensor calibration...");
 
+    // Disable watchdogs during calibration so ESP32 doesn't reset
+    esp_task_wdt_deinit();
+    rtc_wdt_protect_off();
+    rtc_wdt_disable();
+
+    // Countdown removed for testing - add back later
+    Serial.println("GO! Calibrating...");
+
     uint16_t calibrationCycles = duration_ms / 10;
 
     for (uint16_t i = 0; i < calibrationCycles; i++) {
         qtr.calibrate();
+        yield();
+
+        // Print progress every 10%
+        if (i % (calibrationCycles / 10) == 0) {
+            Serial.print("Calibrating... ");
+            Serial.print((i * 100) / calibrationCycles);
+            Serial.println("%");
+        }
+
         delay(10);
     }
 
