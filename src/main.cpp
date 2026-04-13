@@ -49,9 +49,8 @@ void setup() {
     wifi.begin();
     if (DEBUG_SERIAL) Serial.println("WiFi started");
 
-    if (DEBUG_SERIAL) Serial.println("Starting calibration...");
-    irSensor.calibrate(500);
-    if (DEBUG_SERIAL) Serial.println("Calibration done");
+    // Kalibrering skjer via WiFi-knappen, ikkje ved oppstart
+    if (DEBUG_SERIAL) Serial.println("Ready. Calibrate via 192.168.4.1");
 }
 
 // ============ Debug Output ============
