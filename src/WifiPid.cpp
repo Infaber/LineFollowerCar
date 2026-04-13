@@ -37,6 +37,10 @@ void WifiPid::begin() {
     setupServer();
     server.begin();
     Serial.println("WebServer started");
+
+    // Blå LED (GPIO2) lyser når WiFi er oppe
+    pinMode(2, OUTPUT);
+    digitalWrite(2, ok ? HIGH : LOW);
 }
 
 void WifiPid::handle() {

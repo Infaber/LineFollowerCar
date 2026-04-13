@@ -94,11 +94,8 @@ void loop() {
     // Stop if not running
     if (!wifi.isRunning()) {
         motorController.stop();
-        digitalWrite(LED_PIN, LOW);
         return;
     }
-
-    digitalWrite(LED_PIN, HIGH);
 
     // Update motor controller base speed from WiFi
     motorController.setBaseSpeed(baseSpeedValue);
