@@ -2,6 +2,7 @@
 #define LINEFOLLOWERCAR_WIFI_HPP
 
 #include <Arduino.h>
+#include "MotorController.hpp"
 
 class PID;
 class IRSensor;
@@ -9,6 +10,7 @@ class IRSensor;
 class WifiPid {
 public:
     WifiPid(PID& pidRef, IRSensor& irRef, int& baseSpeedRef, float& turnGainRef,
+            int& maxTurnRef, MotorController& motorControllerRef,
             float startKp, float startKi, float startKd);
 
     void begin();
@@ -30,6 +32,8 @@ private:
     IRSensor& ir;
     int& baseSpeed;
     float& turnGain;
+    int& maxTurn;
+    MotorController& motorController;
 
     float kp;
     float ki;

@@ -32,8 +32,9 @@ PID pid(DEFAULT_KP, DEFAULT_KI, DEFAULT_KD, IRSensor::CENTER_POSITION);
 // WiFi-tunable parameters (passed by reference)
 int   baseSpeedValue = DEFAULT_BASE_SPEED;
 float turnGain       = 1.0f;
+int   maxTurnValue   = MAX_TURN;
 
-WifiPid wifi(pid, irSensor, baseSpeedValue, turnGain, DEFAULT_KP, DEFAULT_KI, DEFAULT_KD);
+WifiPid wifi(pid, irSensor, baseSpeedValue, turnGain, maxTurnValue, motorController, DEFAULT_KP, DEFAULT_KI, DEFAULT_KD);
 
 
 // ============ Setup ============
@@ -96,8 +97,9 @@ void loop() {
         return;
     }
 
-    // Update motor controller base speed from WiFi
+    // Update motor controller base speed and max turn from WiFi
     motorController.setBaseSpeed(baseSpeedValue);
+    motorController.setMaxTurn(maxTurnValue);
 
     // Read sensor position
     uint16_t position = irSensor.readPosition();

@@ -16,13 +16,21 @@ int MotorController::getBaseSpeed() const {
     return baseSpeed_;
 }
 
+void MotorController::setMaxTurn(int maxTurn) {
+    maxTurn_ = maxTurn;
+}
+
+int MotorController::getMaxTurn() const {
+    return maxTurn_;
+}
+
 void MotorController::drive(int motorSpeed) {
     // Constrain turn amount to prevent oscillation
     motorSpeed = constrain(motorSpeed, -maxTurn_, maxTurn_);
 
     // Motor mixing
-    int left  = baseSpeed_ - motorSpeed;
-    int right = baseSpeed_ + motorSpeed;
+    int left  = baseSpeed_ + motorSpeed;
+    int right = baseSpeed_ - motorSpeed;
 
     // Constrain to valid PWM range (supports reverse)
     left  = constrain(left,  -maxPwm_, maxPwm_);
@@ -37,4 +45,3 @@ void MotorController::stop() {
     motors_.left_motor(0);
     motors_.right_motor(0);
 }
-

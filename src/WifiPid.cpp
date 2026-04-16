@@ -12,11 +12,14 @@ static bool isValidNumber(float v) {
 }
 
 WifiPid::WifiPid(PID& pidRef, IRSensor& irRef, int& baseSpeedRef, float& turnGainRef,
+                 int& maxTurnRef, MotorController& motorControllerRef,
                  float startKp, float startKi, float startKd)
     : pid(pidRef),
       ir(irRef),
       baseSpeed(baseSpeedRef),
       turnGain(turnGainRef),
+      maxTurn(maxTurnRef),
+      motorController(motorControllerRef),
       kp(startKp),
       ki(startKi),
       kd(startKd),
@@ -76,7 +79,8 @@ void WifiPid::setupServer() {
         json += "\"ki\":" + String(ki, 4) + ",";
         json += "\"kd\":" + String(kd, 4) + ",";
         json += "\"base\":" + String(baseSpeed) + ",";
-        json += "\"gain\":" + String(turnGain, 2);
+        json += "\"gain\":" + String(turnGain, 2) + ",";
+        json += "\"maxturn\":" + String(maxTurn);
         json += "}";
         server.send(200, "application/json", json);
     });
@@ -128,6 +132,13 @@ void WifiPid::setupServer() {
         page += "<form action='/sett_gain' method='get'>";
         page += "Gain: <input type='number' name='gain' min='0.10' max='3.00' step='0.05' value='" + String(turnGain, 2) + "'>";
         page += "<input type='submit' value='Oppdater gain'>";
+        page += "</form>";
+
+        // Max turn (-255..255)
+        page += "<hr><h3>Maks svingehastighet</h3>";
+        page += "<form action='/sett_maxturn' method='get'>";
+        page += "Max turn: <input type='number' name='maxturn' min='-255' max='255' step='1' value='" + String(maxTurn) + "'>";
+        page += "<input type='submit' value='Oppdater max turn'>";
         page += "</form>";
 
         page += "<p style='margin-top:20px;color:#555'>WiFi: <b>Linjefølger G11</b> (passord: <b>12345678</b>)</p>";
@@ -221,6 +232,20 @@ void WifiPid::setupServer() {
                 Serial.print("Svingefølsomhet (gain) oppdatert -> ");
                 Serial.println(turnGain, 2);
             }
+        }
+        server.sendHeader("Location", "/");
+        server.send(302);
+    });
+
+    // Sett max turn (-255..255)
+    server.on("/sett_maxturn", HTTP_GET, [this]() {
+        if (server.hasArg("maxturn")) {
+            int t = server.arg("maxturn").toInt();
+            t = constrain(t, -255, 255);
+            maxTurn = t;
+            motorController.setMaxTurn(maxTurn);
+            Serial.print("Max turn oppdatert -> ");
+            Serial.println(maxTurn);
         }
         server.sendHeader("Location", "/");
         server.send(302);

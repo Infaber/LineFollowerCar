@@ -18,10 +18,13 @@ public:
     void setBaseSpeed(int speed);
     int getBaseSpeed() const;
 
+    // Set max turn
+    void setMaxTurn(int maxTurn);
+    int getMaxTurn() const;
+
     // Apply motor speeds based on PID output
     void drive(int motorSpeed);
 
     // Stop both motors
     void stop();
 };
-
