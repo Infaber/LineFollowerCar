@@ -3,7 +3,7 @@
 IRSensor::IRSensor() {
     // Initialize QTR sensor
     qtr.setTypeRC();
-    qtr.setSensorPins((const uint8_t[]){4, 16, 17, 19, 21, 22, 23, 32, 33}, SENSOR_COUNT);
+    qtr.setSensorPins((const uint8_t[]){33, 32, 23, 22, 21, 19, 16, 17, 4}, SENSOR_COUNT);
 
     // Initialize sensor values array
     for (uint8_t i = 0; i < SENSOR_COUNT; i++) {

@@ -42,7 +42,7 @@ float PID::compute(float current_value, float dt) {
     if (dt <= 0.0f) dt = 0.001f;
 
     // Error
-    float error = setpoint - current_value;
+    float error = current_value - setpoint;
 
     // P term
     float P = error;
