@@ -11,7 +11,7 @@ public:
     ~IRSensor();
 
     // Kalibrering
-    void calibrate(uint16_t duration_ms = 4000);
+    void calibrate(uint16_t duration_ms = 5000);
     bool isCalibrated();
 
     // Lesing

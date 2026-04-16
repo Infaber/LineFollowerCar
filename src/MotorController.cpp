@@ -21,7 +21,7 @@ void MotorController::drive(int motorSpeed) {
     motorSpeed = constrain(motorSpeed, -maxTurn_, maxTurn_);
 
     // Motor mixing
-    int left  = baseSpeed_ + motorSpeed;
+    int left  = baseSpeed_ - motorSpeed;
     int right = baseSpeed_ + motorSpeed;
 
     // Constrain to valid PWM range (supports reverse)

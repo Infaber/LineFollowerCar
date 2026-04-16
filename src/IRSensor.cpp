@@ -26,8 +26,14 @@ IRSensor::~IRSensor() {
 void IRSensor::calibrate(uint16_t duration_ms) {
     Serial.println("Starting IR sensor calibration...");
 
-    // Countdown removed for testing - add back later
-    Serial.println("GO! Calibrating...");
+    // Countdown
+    for (int i = 3; i > 0; i--) {
+        Serial.print("Calibration starts in ");
+        Serial.print(i);
+        Serial.println("...");
+        delay(1000);
+    }
+    Serial.println("GO! Move robot over the line!");
 
     uint16_t calibrationCycles = duration_ms / 10;
 
@@ -35,7 +41,6 @@ void IRSensor::calibrate(uint16_t duration_ms) {
         qtr.calibrate();
         yield();
 
-        // Print progress every 10%
         if (i % (calibrationCycles / 10) == 0) {
             Serial.print("Calibrating... ");
             Serial.print((i * 100) / calibrationCycles);
@@ -55,18 +60,9 @@ uint16_t IRSensor::readPosition() {
         return CENTER_POSITION;
     }
 
-    //Read line position (average of 5 readings for stability)
-    uint16_t position = 0;
-    for (uint8_t i = 0; i < 5; i++) {
-        position += qtr.readLineBlack(sensorValues);
-    }
-    position /= 5;
-
+    // Les posisjon direkte - biblioteket interpolerer allereie mellom sensorane
+    uint16_t position = qtr.readLineBlack(sensorValues);
     currentPosition = position;
-
-    // Update filter
-    // updateFilter(position);
-
     return position;
 }
 

@@ -169,7 +169,7 @@ void WifiPid::setupServer() {
         calibrationStatus = "KALIBRERER...";
         Serial.println("Kalibrering startet");
 
-        ir.calibrate(2000);
+        ir.calibrate(5000);
 
         calibrationStatus = "FERDIG";
         Serial.println("Kalibrering ferdig");
